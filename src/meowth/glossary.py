@@ -75,6 +75,8 @@ class Glossary:
         json_path = Path(__file__).parent.parent.parent / "resources" / f"glossary_{source_lang}_{target_lang}.json"
         if json_path.exists():
             self._load_json(json_path)
+        elif target_lang == "so":
+            raise RuntimeError(f"Pre-built JSON glossary required for Somali ({json_path.name}) not found. Please generate it using the translation scripts.")
         else:
             self._load_all(pokeapi_dir)
 
@@ -112,6 +114,10 @@ class Glossary:
 
     def _load_csv(self, path: Path, id_col: str, category: str):
         """Load a PokeAPI names CSV and build source->target mapping."""
+        # Check if the target language even has a pokeapi_id
+        if self.target_id is None:
+            return
+            
         # Group by entity ID
         by_id: dict[int, dict[int, str]] = {}
         with open(path, encoding="utf-8") as f:
